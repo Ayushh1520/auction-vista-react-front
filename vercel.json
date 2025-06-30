@@ -1,0 +1,11 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/category/:category", "destination": "/index.html" },
+    { "source": "/search", "destination": "/index.html" },
+    { "source": "/cart", "destination": "/index.html" },
+    { "source": "/wishlist", "destination": "/index.html" },
+    { "source": "/profile", "destination": "/index.html" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
