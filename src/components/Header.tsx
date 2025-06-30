@@ -1,4 +1,4 @@
-import { Search, ShoppingCart, User, Heart, Bell } from 'lucide-react';
+import { Search, ShoppingCart, User, Heart, Bell, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
@@ -19,6 +19,7 @@ const Header = () => {
     isOpen: false,
     mode: 'signin'
   });
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
@@ -119,7 +120,7 @@ const Header = () => {
               </span>
             )}
           </div>
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4 md:space-x-4">
             <span 
               onClick={() => handleTopNavClick('Daily Deals')}
               className="text-gray-600 hover:text-blue-600 cursor-pointer"
@@ -138,15 +139,18 @@ const Header = () => {
             >
               Sell
             </span>
+            <button className="md:hidden p-2" onClick={() => setMobileNavOpen(!mobileNavOpen)}>
+              <Menu className="h-6 w-6 text-gray-600" />
+            </button>
           </div>
         </div>
       </div>
 
       {/* Main Header */}
       <div className="px-4 py-3">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 md:gap-0">
           {/* Logo */}
-          <div className="flex items-center">
+          <div className="flex items-center mb-2 md:mb-0">
             <h1 
               onClick={handleLogoClick}
               className="text-3xl font-bold text-red-600 cursor-pointer hover:text-red-700"
@@ -156,7 +160,7 @@ const Header = () => {
           </div>
 
           {/* Search Bar */}
-          <div className="flex-1 max-w-2xl mx-8">
+          <div className="w-full md:flex-1 max-w-2xl mx-0 md:mx-8 order-2 md:order-none">
             <div className="flex">
               <div className="relative flex-1">
                 <Input 
@@ -165,13 +169,13 @@ const Header = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  className="w-full pl-4 pr-12 py-3 text-lg border-2 border-gray-300 rounded-l-md focus:border-blue-500 focus:outline-none"
+                  className="w-full pl-4 pr-12 py-3 text-base md:text-lg border-2 border-gray-300 rounded-l-md focus:border-blue-500 focus:outline-none"
                 />
                 <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               </div>
               <Button 
                 onClick={handleSearch}
-                className="bg-blue-600 hover:bg-blue-700 px-8 py-3 rounded-r-md text-white font-semibold"
+                className="bg-blue-600 hover:bg-blue-700 px-4 md:px-8 py-3 rounded-r-md text-white font-semibold"
               >
                 Search
               </Button>
@@ -179,7 +183,7 @@ const Header = () => {
           </div>
 
           {/* Right Side Icons */}
-          <div className="flex items-center space-x-6">
+          <div className="hidden md:flex items-center space-x-6">
             <Bell 
               onClick={handleNotificationClick}
               className="h-6 w-6 text-gray-600 hover:text-blue-600 cursor-pointer" 
@@ -208,11 +212,34 @@ const Header = () => {
             />
           </div>
         </div>
+        {/* Mobile menu for icons */}
+        {mobileNavOpen && (
+          <div className="md:hidden flex flex-col items-center gap-4 mt-4">
+            <div className="flex items-center space-x-6">
+              <Bell 
+                onClick={handleNotificationClick}
+                className="h-6 w-6 text-gray-600 hover:text-blue-600 cursor-pointer" 
+              />
+              <Heart 
+                onClick={handleWishlistClick}
+                className="h-6 w-6 text-gray-600 hover:text-red-600 cursor-pointer" 
+              />
+              <ShoppingCart 
+                onClick={handleCartClick}
+                className="h-6 w-6 text-gray-600 hover:text-blue-600 cursor-pointer" 
+              />
+              <User 
+                onClick={handleUserClick}
+                className="h-6 w-6 text-gray-600 hover:text-blue-600 cursor-pointer" 
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Navigation */}
       <nav className="bg-gray-100 px-4 py-2">
-        <div className="max-w-7xl mx-auto flex items-center space-x-8">
+        <div className="max-w-7xl mx-auto flex flex-wrap items-center gap-4 md:gap-8">
           <CategoryDropdown />
           <span 
             onClick={() => handleNavClick('Electronics')}
