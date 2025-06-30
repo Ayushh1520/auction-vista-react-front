@@ -1,9 +1,10 @@
-
 import { Heart, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/context/CartContext';
+import { useAuth0 } from '@auth0/auth0-react';
+import { useEffect, useState } from 'react';
 
 interface ProductCardProps {
   id: number;
@@ -33,6 +34,16 @@ const ProductCard = ({
   const { toast } = useToast();
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const { isAuthenticated, loginWithRedirect } = useAuth0();
+  const [isWishlisted, setIsWishlisted] = useState(false);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('wishlist');
+    if (stored) {
+      const wishlist = JSON.parse(stored);
+      setIsWishlisted(wishlist.some((item: any) => item.id === id));
+    }
+  }, [id]);
 
   const handleBuyNow = () => {
     // Add to cart first
@@ -59,11 +70,28 @@ const ProductCard = ({
   };
 
   const handleWishlist = () => {
-    toast({
-      title: "Added to wishlist",
-      description: `${title} has been added to your wishlist`,
-    });
-    console.log('Wishlist clicked for product:', id, title);
+    if (!isAuthenticated) {
+      loginWithRedirect();
+      return;
+    }
+    const stored = localStorage.getItem('wishlist');
+    let wishlist = stored ? JSON.parse(stored) : [];
+    if (wishlist.some((item: any) => item.id === id)) {
+      wishlist = wishlist.filter((item: any) => item.id !== id);
+      setIsWishlisted(false);
+      toast({
+        title: "Removed from wishlist",
+        description: `${title} removed from your wishlist`,
+      });
+    } else {
+      wishlist.push({ id, title, price, image });
+      setIsWishlisted(true);
+      toast({
+        title: "Added to wishlist",
+        description: `${title} added to your wishlist`,
+      });
+    }
+    localStorage.setItem('wishlist', JSON.stringify(wishlist));
   };
 
   return (
@@ -81,9 +109,10 @@ const ProductCard = ({
         )}
         <button 
           onClick={handleWishlist}
-          className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors"
+          className={`absolute top-2 right-2 p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors ${isWishlisted ? 'text-red-500' : 'text-gray-600'}`}
+          title={isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'}
         >
-          <Heart className="h-4 w-4 text-gray-600 hover:text-red-500" />
+          <Heart className="h-4 w-4" fill={isWishlisted ? 'currentColor' : 'none'} />
         </button>
       </div>
       

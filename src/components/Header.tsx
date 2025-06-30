@@ -1,4 +1,3 @@
-
 import { Search, ShoppingCart, User, Heart, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,11 +7,13 @@ import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/context/CartContext';
 import CategoryDropdown from './CategoryDropdown';
 import AuthModal from './AuthModal';
+import { useAuth0 } from '@auth0/auth0-react';
 
 const Header = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { getCartCount } = useCart();
+  const { isAuthenticated, loginWithRedirect, logout, user, isLoading } = useAuth0();
   const [searchQuery, setSearchQuery] = useState('');
   const [authModal, setAuthModal] = useState<{ isOpen: boolean; mode: 'signin' | 'register' }>({
     isOpen: false,
@@ -37,11 +38,11 @@ const Header = () => {
   };
 
   const handleWishlistClick = () => {
-    toast({
-      title: "Wishlist",
-      description: "Opening your wishlist",
-    });
-    console.log('Wishlist clicked');
+    if (!isAuthenticated) {
+      loginWithRedirect();
+      return;
+    }
+    navigate('/wishlist');
   };
 
   const handleNotificationClick = () => {
@@ -53,11 +54,11 @@ const Header = () => {
   };
 
   const handleUserClick = () => {
-    toast({
-      title: "Account",
-      description: "Opening your account settings",
-    });
-    console.log('User account clicked');
+    if (!isAuthenticated) {
+      loginWithRedirect();
+      return;
+    }
+    navigate('/profile');
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -94,20 +95,29 @@ const Header = () => {
       <div className="bg-gray-50 px-4 py-2">
         <div className="max-w-7xl mx-auto flex justify-between items-center text-sm">
           <div className="flex items-center space-x-4">
-            <span className="text-gray-600">Hi! 
-              <span 
-                onClick={() => handleAuthClick('signin')}
-                className="text-blue-600 hover:underline cursor-pointer ml-1"
-              >
-                Sign in
-              </span> or 
-              <span 
-                onClick={() => handleAuthClick('register')}
-                className="text-blue-600 hover:underline cursor-pointer ml-1"
-              >
-                register
+            {isAuthenticated ? (
+              <span className="flex items-center space-x-2">
+                {user?.picture && (
+                  <img src={user.picture} alt={user.name} className="w-6 h-6 rounded-full" />
+                )}
+                <span className="text-gray-700">{user?.name}</span>
+                <button
+                  onClick={() => logout()}
+                  className="text-blue-600 hover:underline cursor-pointer ml-2"
+                >
+                  Logout
+                </button>
               </span>
-            </span>
+            ) : (
+              <span>
+                <button
+                  onClick={() => loginWithRedirect()}
+                  className="text-blue-600 hover:underline cursor-pointer ml-1"
+                >
+                  Login
+                </button>
+              </span>
+            )}
           </div>
           <div className="flex items-center space-x-4">
             <span 

@@ -1,7 +1,6 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Trash2, Plus, Minus } from 'lucide-react';
+import { ArrowLeft, Trash2, Plus, Minus, Heart } from 'lucide-react';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
@@ -35,6 +34,15 @@ const Cart = () => {
     }
   ]);
 
+  const [wishlist, setWishlist] = useState<CartItem[]>(() => {
+    const stored = localStorage.getItem('wishlist');
+    return stored ? JSON.parse(stored) : [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('wishlist', JSON.stringify(wishlist));
+  }, [wishlist]);
+
   const updateQuantity = (id: number, newQuantity: number) => {
     if (newQuantity === 0) {
       removeItem(id);
@@ -53,6 +61,26 @@ const Cart = () => {
       title: "Item Removed",
       description: "Item has been removed from your cart",
     });
+  };
+
+  const isInWishlist = (id: number) => wishlist.some(item => item.id === id);
+
+  const handleWishlist = (item: CartItem) => {
+    if (isInWishlist(item.id)) {
+      const updated = wishlist.filter(w => w.id !== item.id);
+      setWishlist(updated);
+      toast({
+        title: "Removed from Wishlist",
+        description: `${item.title} removed from your wishlist`,
+      });
+    } else {
+      const updated = [...wishlist, item];
+      setWishlist(updated);
+      toast({
+        title: "Added to Wishlist",
+        description: `${item.title} added to your wishlist`,
+      });
+    }
   };
 
   const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -120,6 +148,15 @@ const Cart = () => {
                         <Plus className="h-4 w-4" />
                       </Button>
                     </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleWishlist(item)}
+                      className={isInWishlist(item.id) ? 'text-red-500' : 'text-gray-600'}
+                      title={isInWishlist(item.id) ? 'Remove from Wishlist' : 'Add to Wishlist'}
+                    >
+                      <Heart className="h-4 w-4" fill={isInWishlist(item.id) ? 'currentColor' : 'none'} />
+                    </Button>
                     <Button
                       variant="destructive"
                       size="sm"
