@@ -1,7 +1,14 @@
 
+import { useState } from 'react';
 import ProductCard from './ProductCard';
+import { useToast } from '@/components/ui/use-toast';
 
 const ProductGrid = () => {
+  const { toast } = useToast();
+  const [sortBy, setSortBy] = useState('Best Match');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [currentPage, setCurrentPage] = useState(1);
+
   const products = [
     {
       id: 1,
@@ -95,26 +102,74 @@ const ProductGrid = () => {
     }
   ];
 
+  const handleSortChange = (value: string) => {
+    setSortBy(value);
+    toast({
+      title: "Sorting",
+      description: `Sorting by ${value}`,
+    });
+    console.log('Sort changed to:', value);
+  };
+
+  const handleViewModeChange = (mode: 'grid' | 'list') => {
+    setViewMode(mode);
+    toast({
+      title: "View Mode",
+      description: `Switched to ${mode} view`,
+    });
+    console.log('View mode changed to:', mode);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    toast({
+      title: "Page Changed",
+      description: `Viewing page ${page}`,
+    });
+    console.log('Page changed to:', page);
+    // Scroll to top when page changes
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-800">Featured Products</h2>
         <div className="flex items-center space-x-4">
-          <select className="border border-gray-300 rounded-md px-3 py-2 text-sm">
+          <select 
+            value={sortBy}
+            onChange={(e) => handleSortChange(e.target.value)}
+            className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
             <option>Best Match</option>
             <option>Price: Low to High</option>
             <option>Price: High to Low</option>
             <option>Newest</option>
+            <option>Most Popular</option>
           </select>
           <div className="flex items-center space-x-2 text-sm text-gray-600">
             <span>View:</span>
-            <button className="p-1 border rounded">Grid</button>
-            <button className="p-1 border rounded bg-gray-100">List</button>
+            <button 
+              onClick={() => handleViewModeChange('grid')}
+              className={`p-2 border rounded ${viewMode === 'grid' ? 'bg-blue-100 border-blue-500' : 'hover:bg-gray-50'}`}
+            >
+              Grid
+            </button>
+            <button 
+              onClick={() => handleViewModeChange('list')}
+              className={`p-2 border rounded ${viewMode === 'list' ? 'bg-blue-100 border-blue-500' : 'hover:bg-gray-50'}`}
+            >
+              List
+            </button>
           </div>
         </div>
       </div>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className={`grid gap-6 ${
+        viewMode === 'grid' 
+          ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
+          : 'grid-cols-1'
+      }`}>
         {products.map((product) => (
           <ProductCard key={product.id} {...product} />
         ))}
@@ -122,11 +177,33 @@ const ProductGrid = () => {
       
       <div className="flex justify-center mt-8">
         <div className="flex items-center space-x-2">
-          <button className="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50">Previous</button>
-          <button className="px-3 py-2 bg-blue-600 text-white rounded-md">1</button>
-          <button className="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50">2</button>
-          <button className="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50">3</button>
-          <button className="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50">Next</button>
+          <button 
+            onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+            disabled={currentPage === 1}
+            className="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Previous
+          </button>
+          {[1, 2, 3].map((page) => (
+            <button 
+              key={page}
+              onClick={() => handlePageChange(page)}
+              className={`px-3 py-2 rounded-md ${
+                currentPage === page 
+                  ? 'bg-blue-600 text-white' 
+                  : 'border border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              {page}
+            </button>
+          ))}
+          <button 
+            onClick={() => handlePageChange(Math.min(3, currentPage + 1))}
+            disabled={currentPage === 3}
+            className="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Next
+          </button>
         </div>
       </div>
     </div>

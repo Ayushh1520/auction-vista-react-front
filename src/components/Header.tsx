@@ -1,13 +1,19 @@
 
-import { Search, ShoppingCart, User, Menu, Heart, Bell } from 'lucide-react';
+import { Search, ShoppingCart, User, Heart, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
 import { useState } from 'react';
+import CategoryDropdown from './CategoryDropdown';
+import AuthModal from './AuthModal';
 
 const Header = () => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
+  const [authModal, setAuthModal] = useState<{ isOpen: boolean; mode: 'signin' | 'register' }>({
+    isOpen: false,
+    mode: 'signin'
+  });
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
@@ -62,18 +68,66 @@ const Header = () => {
     }
   };
 
+  const handleAuthClick = (mode: 'signin' | 'register') => {
+    setAuthModal({ isOpen: true, mode });
+  };
+
+  const handleNavClick = (category: string) => {
+    toast({
+      title: "Category",
+      description: `Browsing ${category}`,
+    });
+    console.log('Navigation clicked:', category);
+  };
+
+  const handleTopNavClick = (section: string) => {
+    toast({
+      title: section,
+      description: `Opening ${section}`,
+    });
+    console.log('Top nav clicked:', section);
+  };
+
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       {/* Top Bar */}
       <div className="bg-gray-50 px-4 py-2">
         <div className="max-w-7xl mx-auto flex justify-between items-center text-sm">
           <div className="flex items-center space-x-4">
-            <span className="text-gray-600">Hi! <span className="text-blue-600 hover:underline cursor-pointer">Sign in</span> or <span className="text-blue-600 hover:underline cursor-pointer">register</span></span>
+            <span className="text-gray-600">Hi! 
+              <span 
+                onClick={() => handleAuthClick('signin')}
+                className="text-blue-600 hover:underline cursor-pointer ml-1"
+              >
+                Sign in
+              </span> or 
+              <span 
+                onClick={() => handleAuthClick('register')}
+                className="text-blue-600 hover:underline cursor-pointer ml-1"
+              >
+                register
+              </span>
+            </span>
           </div>
           <div className="flex items-center space-x-4">
-            <span className="text-gray-600 hover:text-blue-600 cursor-pointer">Daily Deals</span>
-            <span className="text-gray-600 hover:text-blue-600 cursor-pointer">Help & Contact</span>
-            <span className="text-gray-600 hover:text-blue-600 cursor-pointer">Sell</span>
+            <span 
+              onClick={() => handleTopNavClick('Daily Deals')}
+              className="text-gray-600 hover:text-blue-600 cursor-pointer"
+            >
+              Daily Deals
+            </span>
+            <span 
+              onClick={() => handleTopNavClick('Help & Contact')}
+              className="text-gray-600 hover:text-blue-600 cursor-pointer"
+            >
+              Help & Contact
+            </span>
+            <span 
+              onClick={() => handleTopNavClick('Sell')}
+              className="text-gray-600 hover:text-blue-600 cursor-pointer"
+            >
+              Sell
+            </span>
           </div>
         </div>
       </div>
@@ -140,18 +194,51 @@ const Header = () => {
       {/* Navigation */}
       <nav className="bg-gray-100 px-4 py-2">
         <div className="max-w-7xl mx-auto flex items-center space-x-8">
-          <div className="flex items-center space-x-1 cursor-pointer hover:text-blue-600">
-            <Menu className="h-4 w-4" />
-            <span>Shop by category</span>
-          </div>
-          <span className="text-gray-600 hover:text-blue-600 cursor-pointer">Electronics</span>
-          <span className="text-gray-600 hover:text-blue-600 cursor-pointer">Fashion</span>
-          <span className="text-gray-600 hover:text-blue-600 cursor-pointer">Home & Garden</span>
-          <span className="text-gray-600 hover:text-blue-600 cursor-pointer">Motors</span>
-          <span className="text-gray-600 hover:text-blue-600 cursor-pointer">Collectibles</span>
-          <span className="text-gray-600 hover:text-blue-600 cursor-pointer">Sports</span>
+          <CategoryDropdown />
+          <span 
+            onClick={() => handleNavClick('Electronics')}
+            className="text-gray-600 hover:text-blue-600 cursor-pointer"
+          >
+            Electronics
+          </span>
+          <span 
+            onClick={() => handleNavClick('Fashion')}
+            className="text-gray-600 hover:text-blue-600 cursor-pointer"
+          >
+            Fashion
+          </span>
+          <span 
+            onClick={() => handleNavClick('Home & Garden')}
+            className="text-gray-600 hover:text-blue-600 cursor-pointer"
+          >
+            Home & Garden
+          </span>
+          <span 
+            onClick={() => handleNavClick('Motors')}
+            className="text-gray-600 hover:text-blue-600 cursor-pointer"
+          >
+            Motors
+          </span>
+          <span 
+            onClick={() => handleNavClick('Collectibles')}
+            className="text-gray-600 hover:text-blue-600 cursor-pointer"
+          >
+            Collectibles
+          </span>
+          <span 
+            onClick={() => handleNavClick('Sports')}
+            className="text-gray-600 hover:text-blue-600 cursor-pointer"
+          >
+            Sports
+          </span>
         </div>
       </nav>
+
+      <AuthModal 
+        isOpen={authModal.isOpen}
+        onClose={() => setAuthModal({ ...authModal, isOpen: false })}
+        mode={authModal.mode}
+      />
     </header>
   );
 };
