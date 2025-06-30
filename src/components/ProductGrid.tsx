@@ -3,13 +3,18 @@ import { useState } from 'react';
 import ProductCard from './ProductCard';
 import { useToast } from '@/components/ui/use-toast';
 
-const ProductGrid = () => {
+interface ProductGridProps {
+  category?: string;
+  searchQuery?: string;
+}
+
+const ProductGrid = ({ category, searchQuery }: ProductGridProps) => {
   const { toast } = useToast();
   const [sortBy, setSortBy] = useState('Best Match');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [currentPage, setCurrentPage] = useState(1);
 
-  const products = [
+  const allProducts = [
     {
       id: 1,
       title: "Apple iPhone 15 Pro Max - 256GB - Natural Titanium (Unlocked)",
@@ -20,7 +25,8 @@ const ProductGrid = () => {
       reviews: 1234,
       shipping: "Free shipping",
       seller: "Apple Store",
-      badge: "Hot Deal"
+      badge: "Hot Deal",
+      categories: ["electronics"]
     },
     {
       id: 2,
@@ -31,7 +37,8 @@ const ProductGrid = () => {
       rating: 4.7,
       reviews: 856,
       shipping: "Free shipping",
-      seller: "Sony Official"
+      seller: "Sony Official",
+      categories: ["electronics"]
     },
     {
       id: 3,
@@ -42,7 +49,8 @@ const ProductGrid = () => {
       rating: 4.9,
       reviews: 2341,
       shipping: "Free shipping",
-      seller: "Nike Store"
+      seller: "Nike Store",
+      categories: ["fashion", "sports"]
     },
     {
       id: 4,
@@ -54,7 +62,8 @@ const ProductGrid = () => {
       reviews: 567,
       shipping: "Free shipping",
       seller: "Apple Store",
-      badge: "Limited Time"
+      badge: "Limited Time",
+      categories: ["electronics"]
     },
     {
       id: 5,
@@ -65,7 +74,8 @@ const ProductGrid = () => {
       rating: 4.5,
       reviews: 423,
       shipping: "Free shipping",
-      seller: "Samsung Electronics"
+      seller: "Samsung Electronics",
+      categories: ["electronics"]
     },
     {
       id: 6,
@@ -75,7 +85,8 @@ const ProductGrid = () => {
       rating: 4.8,
       reviews: 189,
       shipping: "Free shipping",
-      seller: "Canon USA"
+      seller: "Canon USA",
+      categories: ["electronics"]
     },
     {
       id: 7,
@@ -86,7 +97,8 @@ const ProductGrid = () => {
       rating: 4.4,
       reviews: 1876,
       shipping: "Free shipping",
-      seller: "Levi's Store"
+      seller: "Levi's Store",
+      categories: ["fashion"]
     },
     {
       id: 8,
@@ -98,9 +110,26 @@ const ProductGrid = () => {
       reviews: 934,
       shipping: "Free shipping",
       seller: "KitchenAid Official",
-      badge: "Best Seller"
+      badge: "Best Seller",
+      categories: ["home-garden"]
     }
   ];
+
+  // Filter products based on category or search query
+  let products = allProducts;
+  
+  if (category) {
+    products = allProducts.filter(product => 
+      product.categories?.includes(category.toLowerCase().replace('-', ''))
+    );
+  }
+  
+  if (searchQuery) {
+    products = allProducts.filter(product =>
+      product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.seller.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }
 
   const handleSortChange = (value: string) => {
     setSortBy(value);
@@ -122,19 +151,20 @@ const ProductGrid = () => {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    toast({
-      title: "Page Changed",
-      description: `Viewing page ${page}`,
-    });
     console.log('Page changed to:', page);
-    // Scroll to top when page changes
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const getTitle = () => {
+    if (searchQuery) return `Search Results (${products.length} items)`;
+    if (category) return `${category.charAt(0).toUpperCase() + category.slice(1).replace('-', ' & ')} Products`;
+    return 'Featured Products';
   };
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Featured Products</h2>
+        <h2 className="text-2xl font-bold text-gray-800">{getTitle()}</h2>
         <div className="flex items-center space-x-4">
           <select 
             value={sortBy}
@@ -165,47 +195,55 @@ const ProductGrid = () => {
         </div>
       </div>
       
-      <div className={`grid gap-6 ${
-        viewMode === 'grid' 
-          ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
-          : 'grid-cols-1'
-      }`}>
-        {products.map((product) => (
-          <ProductCard key={product.id} {...product} />
-        ))}
-      </div>
-      
-      <div className="flex justify-center mt-8">
-        <div className="flex items-center space-x-2">
-          <button 
-            onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-            disabled={currentPage === 1}
-            className="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Previous
-          </button>
-          {[1, 2, 3].map((page) => (
-            <button 
-              key={page}
-              onClick={() => handlePageChange(page)}
-              className={`px-3 py-2 rounded-md ${
-                currentPage === page 
-                  ? 'bg-blue-600 text-white' 
-                  : 'border border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              {page}
-            </button>
-          ))}
-          <button 
-            onClick={() => handlePageChange(Math.min(3, currentPage + 1))}
-            disabled={currentPage === 3}
-            className="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Next
-          </button>
+      {products.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-gray-500 text-lg">No products found matching your criteria.</p>
         </div>
-      </div>
+      ) : (
+        <>
+          <div className={`grid gap-6 ${
+            viewMode === 'grid' 
+              ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
+              : 'grid-cols-1'
+          }`}>
+            {products.map((product) => (
+              <ProductCard key={product.id} {...product} />
+            ))}
+          </div>
+          
+          <div className="flex justify-center mt-8">
+            <div className="flex items-center space-x-2">
+              <button 
+                onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Previous
+              </button>
+              {[1, 2, 3].map((page) => (
+                <button 
+                  key={page}
+                  onClick={() => handlePageChange(page)}
+                  className={`px-3 py-2 rounded-md ${
+                    currentPage === page 
+                      ? 'bg-blue-600 text-white' 
+                      : 'border border-gray-300 hover:bg-gray-50'
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+              <button 
+                onClick={() => handlePageChange(Math.min(3, currentPage + 1))}
+                disabled={currentPage === 3}
+                className="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };

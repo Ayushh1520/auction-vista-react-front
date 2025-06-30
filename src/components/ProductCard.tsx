@@ -1,6 +1,9 @@
+
 import { Heart, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
+import { useNavigate } from 'react-router-dom';
+import { useCart } from '@/context/CartContext';
 
 interface ProductCardProps {
   id: number;
@@ -28,16 +31,26 @@ const ProductCard = ({
   badge 
 }: ProductCardProps) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { addToCart } = useCart();
 
   const handleBuyNow = () => {
+    // Add to cart first
+    addToCart({ id, title, price, image });
+    
     toast({
       title: "Redirecting to checkout",
       description: `${title} - $${price.toFixed(2)}`,
     });
+    
+    // Navigate to cart
+    navigate('/cart');
     console.log('Buy Now clicked for product:', id, title);
   };
 
   const handleAddToCart = () => {
+    addToCart({ id, title, price, image });
+    
     toast({
       title: "Added to cart",
       description: `${title} has been added to your cart`,

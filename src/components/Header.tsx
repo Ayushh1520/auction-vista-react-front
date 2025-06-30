@@ -4,11 +4,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useCart } from '@/context/CartContext';
 import CategoryDropdown from './CategoryDropdown';
 import AuthModal from './AuthModal';
 
 const Header = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { getCartCount } = useCart();
   const [searchQuery, setSearchQuery] = useState('');
   const [authModal, setAuthModal] = useState<{ isOpen: boolean; mode: 'signin' | 'register' }>({
     isOpen: false,
@@ -17,10 +21,7 @@ const Header = () => {
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
-      toast({
-        title: "Searching...",
-        description: `Searching for "${searchQuery}"`,
-      });
+      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
       console.log('Search clicked with query:', searchQuery);
     } else {
       toast({
@@ -31,10 +32,7 @@ const Header = () => {
   };
 
   const handleCartClick = () => {
-    toast({
-      title: "Shopping Cart",
-      description: "Opening your shopping cart",
-    });
+    navigate('/cart');
     console.log('Cart clicked');
   };
 
@@ -73,10 +71,8 @@ const Header = () => {
   };
 
   const handleNavClick = (category: string) => {
-    toast({
-      title: "Category",
-      description: `Browsing ${category}`,
-    });
+    const categorySlug = category.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-');
+    navigate(`/category/${categorySlug}`);
     console.log('Navigation clicked:', category);
   };
 
@@ -86,6 +82,10 @@ const Header = () => {
       description: `Opening ${section}`,
     });
     console.log('Top nav clicked:', section);
+  };
+
+  const handleLogoClick = () => {
+    navigate('/');
   };
 
   return (
@@ -137,7 +137,12 @@ const Header = () => {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center">
-            <h1 className="text-3xl font-bold text-red-600 cursor-pointer">eBay</h1>
+            <h1 
+              onClick={handleLogoClick}
+              className="text-3xl font-bold text-red-600 cursor-pointer hover:text-red-700"
+            >
+              eBay
+            </h1>
           </div>
 
           {/* Search Bar */}
@@ -181,7 +186,11 @@ const Header = () => {
                 onClick={handleCartClick}
                 className="h-6 w-6 text-gray-600 hover:text-blue-600 cursor-pointer" 
               />
-              <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">2</span>
+              {getCartCount() > 0 && (
+                <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {getCartCount()}
+                </span>
+              )}
             </div>
             <User 
               onClick={handleUserClick}

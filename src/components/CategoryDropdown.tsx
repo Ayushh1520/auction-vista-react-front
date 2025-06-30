@@ -1,11 +1,11 @@
 
 import { useState } from 'react';
 import { Menu, ChevronDown } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 const CategoryDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { toast } = useToast();
+  const navigate = useNavigate();
 
   const categories = [
     'Electronics',
@@ -21,10 +21,8 @@ const CategoryDropdown = () => {
   ];
 
   const handleCategorySelect = (category: string) => {
-    toast({
-      title: "Category Selected",
-      description: `Browsing ${category}`,
-    });
+    const categorySlug = category.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-');
+    navigate(`/category/${categorySlug}`);
     console.log('Category selected:', category);
     setIsOpen(false);
   };
