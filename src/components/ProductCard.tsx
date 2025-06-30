@@ -1,6 +1,6 @@
-
 import { Heart, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/components/ui/use-toast';
 
 interface ProductCardProps {
   id: number;
@@ -16,6 +16,7 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({ 
+  id,
   title, 
   price, 
   originalPrice, 
@@ -26,6 +27,32 @@ const ProductCard = ({
   seller, 
   badge 
 }: ProductCardProps) => {
+  const { toast } = useToast();
+
+  const handleBuyNow = () => {
+    toast({
+      title: "Redirecting to checkout",
+      description: `${title} - $${price.toFixed(2)}`,
+    });
+    console.log('Buy Now clicked for product:', id, title);
+  };
+
+  const handleAddToCart = () => {
+    toast({
+      title: "Added to cart",
+      description: `${title} has been added to your cart`,
+    });
+    console.log('Add to Cart clicked for product:', id, title);
+  };
+
+  const handleWishlist = () => {
+    toast({
+      title: "Added to wishlist",
+      description: `${title} has been added to your wishlist`,
+    });
+    console.log('Wishlist clicked for product:', id, title);
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden group">
       <div className="relative">
@@ -39,7 +66,10 @@ const ProductCard = ({
             {badge}
           </span>
         )}
-        <button className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors">
+        <button 
+          onClick={handleWishlist}
+          className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors"
+        >
           <Heart className="h-4 w-4 text-gray-600 hover:text-red-500" />
         </button>
       </div>
@@ -79,10 +109,17 @@ const ProductCard = ({
         <p className="text-sm text-gray-500 mb-3">Sold by: {seller}</p>
         
         <div className="flex space-x-2">
-          <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white">
+          <Button 
+            onClick={handleBuyNow}
+            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+          >
             Buy It Now
           </Button>
-          <Button variant="outline" className="flex-1 border-blue-600 text-blue-600 hover:bg-blue-50">
+          <Button 
+            onClick={handleAddToCart}
+            variant="outline" 
+            className="flex-1 border-blue-600 text-blue-600 hover:bg-blue-50"
+          >
             Add to Cart
           </Button>
         </div>
